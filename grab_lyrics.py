@@ -8,9 +8,10 @@ from pymongo import MongoClient
 import lyricwikia #https://github.com/enricobacis/lyricwikia
 secrets = Secrets()
 
-
-link = "https://www.azlyrics.com/lyrics/fountainsofwayne/stacysmom.html"
-link = "https://www.azlyrics.com/lyrics/logic/18002738255.html"
+links = []
+links.append("https://www.azlyrics.com/lyrics/fountainsofwayne/stacysmom.html")
+links.append("https://www.azlyrics.com/lyrics/logic/18002738255.html")
+links.append("https://www.azlyrics.com/lyrics/panicatthedisco/ladevotee.html")
 
 def get_lyrics(link):
     out = ""
@@ -27,7 +28,6 @@ def get_lyrics(link):
     return out
 
 def parse_and_count(link):
-
     tag_suppression = True
     n = 1
     min_token_len = 4
@@ -49,12 +49,37 @@ def parse_and_count(link):
 
     ana = metapy.analyzers.NGramWordAnalyzer(n, tok)
     ngrams = ana.analyze(doc)
-    print ngrams
 
     return ngrams
 
+#def tf_idf_normalize()
 
-parse_and_count(link)
+def write_file(filename, contents):
+    file = open(filename, "w")
+    file.write(str(contents))
+    file.close()
+
+def write_dicts(links):
+    doc_freqs = Counter()
+    for link in links:
+        id = link[link.rfind("/")+1:link.find(".html")]
+        result = parse_and_count(link)
+
+        for token in result:
+            doc_freqs[token] += 1
+
+        write_file("dicts/" + id + ".txt", result)
+
+    write_file("dicts/doc_freqs_counter.txt", str(doc_freqs))
+
+write_dicts(links)
+
+
+'''
+f = open("test.txt", "r")
+contents = f.read()
+print(eval(contents))
+'''
 
 
 
