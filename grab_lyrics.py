@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import urllib2
+import os
+import math
 
 from collections import Counter
 import metapy
@@ -60,6 +62,9 @@ def write_file(filename, contents):
     file.close()
 
 def write_dicts(links):
+
+    idf_num = 5
+
     doc_freqs = Counter()
     for link in links:
         id = link[link.rfind("/")+1:link.find(".html")]
@@ -70,7 +75,22 @@ def write_dicts(links):
 
         write_file("dicts/" + id + ".txt", result)
 
-    write_file("dicts/doc_freqs_counter.txt", str(doc_freqs))
+    for filename in os.listdir("dicts"):
+        print filename
+        file = open("dicts/" + filename, "r")
+        contents = file.read()
+        file.close()
+
+        result = eval(contents)
+
+        for token in result:
+            log_int = idf_num / float(doc_freqs[token]) if token in doc_freqs else 1
+            idf = math.log(log_int)
+            result[token] *= idf
+
+        write_file("dicts/" + filename, str(result))
+
+    #write_file("dicts/doc_freqs_counter.txt", str(doc_freqs))
 
 write_dicts(links)
 
