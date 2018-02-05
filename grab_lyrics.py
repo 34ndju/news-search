@@ -9,6 +9,7 @@ secrets = Secrets()
 
 
 link = "https://www.azlyrics.com/lyrics/fountainsofwayne/stacysmom.html"
+link = "https://www.azlyrics.com/lyrics/panicatthedisco/thisisgospel.html"
 
 def get_lyrics(link):
     out = ""
@@ -24,9 +25,18 @@ def get_lyrics(link):
 
     return out
 
+def tokenize(lyrics):
+    doc = metapy.index.Document()
+    doc.content(lyrics)
 
+    tok = metapy.analyzers.ICUTokenizer()
+    tok.set_content(lyrics)
+    tokens = [token for token in tok]
+    print tokens
 
-print get_lyrics(link)
+lyrics = get_lyrics(link)
+print lyrics
+tokenize(lyrics)
 
 
 
