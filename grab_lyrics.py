@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup as bs
+from universal import Universal
 import urllib2
 import os
 import math
@@ -10,6 +11,7 @@ import metapy
 from authentication import Secrets
 from pymongo import MongoClient
 import lyricwikia #https://github.com/enricobacis/lyricwikia
+universe = Universal()
 secrets = Secrets()
 
 links = []
@@ -55,9 +57,9 @@ def write_file(filename, contents):
 #also does tf idf weighting
 def write_dicts(links):
 
-    req_timeout = 2 #seconds
-    raw_counts_dir_name = "raw_counts"
-    normalized_dir_name = "normalized_counts"
+    req_timeout = 3 #seconds
+    raw_counts_dir_name = universe.raw_counts_dir_name
+    normalized_dir_name = universe.normalized_dir_name
 
     if not os.path.exists(normalized_dir_name):
         os.mkdir(normalized_dir_name)
@@ -68,31 +70,26 @@ def write_dicts(links):
     doc_freqs = Counter()
     doc_count = 0
     for link in links:
-        try: #metapy bug
-            id = link[link.rfind("/")+1:].lower().replace("+","_")
-            filename = id + ".txt"
+        id = link[link.rfind("/")+1:].lower().replace("+","_")
+        filename = id + ".txt"
 
-            if filename in os.listdir(raw_counts_dir_name):
-                file = open(raw_counts_dir_name + "/" + filename, "r")
-                contents = file.read()
-                file.close()
-                result = eval(contents)
-            else:
-                result = parse_and_count(link)
-                write_file(raw_counts_dir_name + "/" + filename, str(result))
+        if filename in os.listdir(raw_counts_dir_name):
+            print "found " + filename
+            file = open(raw_counts_dir_name + "/" + filename, "r")
+            contents = file.read()
+            file.close()
+            result = eval(contents)
+        else:
+            print "creating " + filename
+            result = parse_and_count(link)
+            write_file(raw_counts_dir_name + "/" + filename, str(result))
+            time.sleep(req_timeout)
 
-            for token in result:
-                doc_freqs[token] += 1
-            doc_count += 1
-
-        except:
-            continue
-
-        print doc_count
-        time.sleep(req_timeout)
+        for token in result:
+            doc_freqs[token] += 1
+        doc_count += 1
 
     for filename in os.listdir(raw_counts_dir_name):
-        print filename
         file = open(raw_counts_dir_name + "/" + filename, "r")
         contents = file.read()
         file.close()
@@ -106,11 +103,12 @@ def write_dicts(links):
 
         write_file(normalized_dir_name + "/" + filename, str(result))
 
-links = []
-links.append("https://www.lyrics.com/lyric/32381346/Panic%21+At+the+Disco/La+Devotee")
-links.append("https://www.lyrics.com/lyric/13945900/Panic%21+At+the+Disco/Nine+in+the+Afternoon")
+if __name__ == "__main__":
+    links = []
+    links.append("https://www.lyrics.com/lyric/32381346/Panic%21+At+the+Disco/La+Devotee")
+    links.append("https://www.lyrics.com/lyric/13945900/Panic%21+At+the+Disco/Nine+in+the+Afternoon")
 
-write_dicts(links)
+    write_dicts(links)
 
 
 '''

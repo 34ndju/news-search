@@ -1,3 +1,4 @@
 authentication.py
 lemur-stopwords.txt
 *.txt
+*.pyc
