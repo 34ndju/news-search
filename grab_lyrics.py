@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup as bs
 from universal import Universal
 import urllib2
+import urllib
 import os
 import math
 import time
@@ -71,7 +72,8 @@ def write_dicts(genre, links):
     doc_freqs = Counter()
     doc_count = 0
     for link in links:
-        id = link[link.rfind("/")+1:].lower().replace("+","_")
+        link = urllib.unquote(link)
+        id = link[link.rfind("/")+1:].lower().replace("+","_").replace("'", "")
         filename = id + ".txt"
 
         if filename in os.listdir(raw_counts_dir_name):
