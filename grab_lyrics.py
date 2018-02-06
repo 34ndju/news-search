@@ -55,11 +55,12 @@ def write_file(filename, contents):
     file.close()
 
 #also does tf idf weighting
-def write_dicts(links):
+def write_dicts(genre, links):
 
     req_timeout = 3 #seconds
     raw_counts_dir_name = universe.raw_counts_dir_name
     normalized_dir_name = universe.normalized_dir_name
+    delimiter = universe.delimiter
 
     if not os.path.exists(normalized_dir_name):
         os.mkdir(normalized_dir_name)
@@ -76,13 +77,15 @@ def write_dicts(links):
         if filename in os.listdir(raw_counts_dir_name):
             print "found " + filename
             file = open(raw_counts_dir_name + "/" + filename, "r")
-            contents = file.read()
+            contents = file.read().split(delimiter)
             file.close()
-            result = eval(contents)
+            genre = contents[0] #do something
+            result = eval(contents[-1])
         else:
             print "creating " + filename
             result = parse_and_count(link)
-            write_file(raw_counts_dir_name + "/" + filename, str(result))
+            out = genre + delimiter + str(result)
+            write_file(raw_counts_dir_name + "/" + filename, out)
             time.sleep(req_timeout)
 
         for token in result:
@@ -91,17 +94,19 @@ def write_dicts(links):
 
     for filename in os.listdir(raw_counts_dir_name):
         file = open(raw_counts_dir_name + "/" + filename, "r")
-        contents = file.read()
+        contents = file.read().split(delimiter)
         file.close()
 
-        result = eval(contents)
+        genre = contents[0]
+        result = eval(contents[-1])
 
         for token in result:
             log_int = doc_count / float(doc_freqs[token])
             idf = math.log(log_int)
             result[token] *= idf
 
-        write_file(normalized_dir_name + "/" + filename, str(result))
+        out = genre + delimiter + str(result)
+        write_file(normalized_dir_name + "/" + filename, out)
 
 if __name__ == "__main__":
     links = []
