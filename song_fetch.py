@@ -18,3 +18,5 @@ for filename in os.listdir(links_dir_name):
     genre = filename.split(".")[0]
     links = contents.split()
     write_dicts(genre, links)
+
+write_normalized_counts()
